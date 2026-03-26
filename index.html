@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wrapped 2026 | Vorbestellung</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700;900&family=Montserrat:wght@900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #121212; --cream: #F2F0E9; --green: #9ED747;
+    --purple: #9BA1FF; --red: #FF4C3B; --yellow: #FBD64F;
+  }
+
+  /* 1. Custom Cursor */
+  * { box-sizing: border-box; margin: 0; padding: 0; cursor: crosshair; }
+  body { background-color: var(--bg); color: var(--cream); font-family: 'DM Sans', sans-serif; overflow-x: hidden; }
+
+  /* 9. Progress Bar */
+  #progress-bar { position: fixed; top: 0; left: 0; height: 5px; background: var(--red); width: 0%; z-index: 9999; transition: width 0.3s; }
+
+  /* Top Bar (Time & Countdown) */
+  .top-hud { display: flex; justify-content: space-between; background: var(--bg); color: var(--green); padding: 5px 15px; font-family: 'Montserrat', sans-serif; font-size: 0.9rem; border-bottom: 1px solid #333; }
+
+  /* Ticker */
+  .marquee { background-color: var(--green); color: var(--bg); padding: 10px 0; overflow: hidden; white-space: nowrap; border-bottom: 3px solid var(--cream); font-family: 'Montserrat', sans-serif; font-size: 1.2rem; font-weight: 900; text-transform: uppercase; }
+  .marquee span { display: inline-block; animation: scroll 15s linear infinite; }
+  @keyframes scroll { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+
+  .container { max-width: 800px; margin: 0 auto; padding: 40px 20px; text-align: center; }
+  h1 { font-family: 'Montserrat', sans-serif; font-size: clamp(2.5rem, 8vw, 5rem); text-transform: uppercase; line-height: 1; margin-bottom: 20px; user-select: none; }
+  h1 span { color: var(--red); background-color: var(--cream); padding: 0 10px; }
+  p { font-size: 1.2rem; margin-bottom: 30px; font-weight: 700; }
+  
+  /* 8. Scarcity Bar */
+  .scarcity { background: #333; height: 20px; width: 100%; margin: 20px 0; position: relative; border: 2px solid var(--cream); }
+  .scarcity-fill { background: var(--red); height: 100%; width: 82%; }
+  .scarcity-text { position: absolute; width: 100%; text-align: center; top: -2px; font-weight: 900; font-size: 0.8rem; color: var(--cream); font-family: 'Montserrat', sans-serif; mix-blend-mode: difference; }
+
+  /* Gatekeeper Buttons */
+  .faction-grid { display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 40px; }
+  .btn-faction { background-color: var(--bg); border: 4px solid var(--cream); color: var(--cream); padding: 20px; font-family: 'Montserrat', sans-serif; font-size: 1.5rem; text-transform: uppercase; transition: all 0.2s; }
+  .btn-faction:hover { background-color: var(--cream); color: var(--bg); transform: scale(1.02); }
+
+  #dynamic-content { display: none; animation: fadeIn 0.5s ease-in; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+  .pitch-box { background-color: var(--purple); color: var(--bg); padding: 30px; border: 4px solid var(--cream); margin-bottom: 40px; text-align: left; transform: rotate(-1deg); }
+  .pitch-title { font-family: 'Montserrat', sans-serif; font-size: 2rem; margin-bottom: 10px; text-transform: uppercase; }
+  .pitch-text { font-size: 1.2rem; font-weight: 700; }
+
+  /* Deal Badge (Restored) */
+  .deal-badge { background-color: var(--red); color: var(--cream); font-family: 'Montserrat', sans-serif; font-size: 1.5rem; padding: 10px; text-align: center; text-transform: uppercase; margin-bottom: 20px; border: 2px dashed var(--cream); }
+
+  /* Form */
+  form { display: flex; flex-direction: column; gap: 15px; text-align: left; }
+  label { font-family: 'Montserrat', sans-serif; font-size: 1.2rem; color: var(--yellow); text-transform: uppercase; }
+  input, select { width: 100%; padding: 15px; font-family: 'DM Sans', sans-serif; font-size: 1.2rem; font-weight: 700; background-color: var(--cream); border: 4px solid var(--bg); }
+  input:focus, select:focus { outline: none; border-color: var(--green); }
+  
+  /* 2. Glitch Submit Button */
+  .btn-submit { background-color: var(--green); color: var(--bg); font-family: 'Montserrat', sans-serif; font-size: 2rem; padding: 20px; border: none; text-transform: uppercase; margin-top: 10px; position: relative; box-shadow: 6px 6px 0px var(--cream); transition: transform 0.1s; }
+  .btn-submit:hover { animation: glitch 0.2s infinite; background-color: var(--red); color: var(--cream); }
+  .btn-submit:active { transform: translate(4px, 4px); box-shadow: 2px 2px 0px var(--cream); }
+  @keyframes glitch {
+    0% { transform: translate(0) }
+    20% { transform: translate(-2px, 2px) }
+    40% { transform: translate(-2px, -2px) }
+    60% { transform: translate(2px, 2px) }
+    80% { transform: translate(2px, -2px) }
+    100% { transform: translate(0) }
+  }
+
+  /* 6. Social Proof Toast */
+  #toast { position: fixed; bottom: 20px; left: -300px; background: var(--cream); color: var(--bg); padding: 15px; font-weight: 700; border: 3px solid var(--bg); box-shadow: 4px 4px 0px var(--red); transition: left 0.4s; z-index: 1000; }
+  #toast.show { left: 20px; }
+</style>
+</head>
+<body>
+
+  <div id="progress-bar"></div>
+
+  <div class="top-hud">
+    <span id="local-time">LINZ SECURE UPLINK: 00:00:00</span>
+    <span id="fomo-timer">DROP SCHLIESST IN: 05:00</span>
+  </div>
+
+  <div class="marquee">
+    <span>+++ 50 CENT RABATT BEI VORBESTELLUNG +++ 14 KAUFEN, 1 GRATIS (KLASSEN-DEAL) +++ DROP ENDET NACH DEN OSTERFERIEN +++</span>
+  </div>
+
+  <div class="container" id="gate-section">
+    <h1 id="title-trigger">IDENTIFIZIERE<br><span>DEINE EINHEIT</span></h1>
+    <p>Der C-Zweig Drop 2026. Wer bist du?</p>
+    
+    <div class="scarcity">
+      <div class="scarcity-fill"></div>
+      <div class="scarcity-text">SYNDIKATS-DEALS: 82% VERGRIFFEN</div>
+    </div>
+    
+    <div class="faction-grid">
+      <button class="btn-faction" style="border-color: var(--green); color: var(--green);" onclick="loadFaction('c')">Ich bin C-Zweig Genosse</button>
+      <button class="btn-faction" style="border-color: var(--yellow); color: var(--yellow);" onclick="loadFaction('abm')">A / B / M Zweig</button>
+      <button class="btn-faction" style="border-color: #555; color: #aaa;" onclick="loadFaction('lehrer')">Lehrpersonal</button>
+    </div>
+  </div>
+
+  <div class="container" id="dynamic-content">
+    <div class="pitch-box">
+      <div class="pitch-title" id="dyn-title"></div>
+      <div class="pitch-text" id="dyn-text"></div>
+    </div>
+
+    <div class="deal-badge">
+      Alle Vorbesteller sparen 0,50€ am Stand!
+    </div>
+
+    <form action="DEINE_MAKE_COM_WEBHOOK_URL_HIER" method="POST" id="order-form">
+      <input type="hidden" name="fraktion" id="hidden-faction" value="">
+      <input type="hidden" name="source" id="hidden-utm" value="organic">
+
+      <div>
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name" required placeholder="Vor- und Nachname" oninput="updateProgress()">
+      </div>
+
+      <div>
+        <label for="klasse">Klasse / Kürzel</label>
+        <input type="text" id="klasse" name="klasse" required placeholder="z.B. 8A oder Lehrer-Kürzel" oninput="updateProgress()">
+      </div>
+
+      <div>
+        <label for="bundle">Dein Deal</label>
+        <select id="bundle" name="bundle" required onchange="updateProgress()">
+          </select>
+      </div>
+
+      <button type="submit" class="btn-submit">Jetzt Vorbestellen</button>
+    </form>
+  </div>
+
+  <div id="toast">🔥 Jemand aus der 8B hat gerade bestellt.</div>
+
+  <script>
+    // 3. Audio Feedback (Synth Beep)
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playBeep() {
+      if(audioCtx.state === 'suspended') audioCtx.resume();
+      const oscillator = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      oscillator.type = 'square';
+      oscillator.frequency.setValueAtTime(150, audioCtx.currentTime); 
+      oscillator.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.1);
+      gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      oscillator.start();
+      oscillator.stop(audioCtx.currentTime + 0.1);
+    }
+
+    // 4. UTM Grabber
+    const urlParams = new URLSearchParams(window.location.search);
+    if(urlParams.has('ref')) {
+      document.getElementById('hidden-utm').value = urlParams.get('ref');
+    }
+
+    // 5. FOMO Timer
+    let timeLeft = 300; 
+    setInterval(() => {
+      if(timeLeft <= 0) return;
+      timeLeft--;
+      let m = Math.floor(timeLeft / 60);
+      let s = timeLeft % 60;
+      document.getElementById('fomo-timer').innerText = `DROP SCHLIESST IN: 0${m}:${s < 10 ? '0'+s : s}`;
+    }, 1000);
+
+    // 7. Live Time Linz
+    setInterval(() => {
+      const now = new Date();
+      document.getElementById('local-time').innerText = `LINZ SECURE UPLINK: ${now.toLocaleTimeString('de-AT')}`;
+    }, 1000);
+
+    // 6. Fake Social Proof Toasts
+    const names = ["Rafi (8C)", "Ein A-Klässler", "Jemand aus der 8M", "Ein Lehrer"];
+    setInterval(() => {
+      const toast = document.getElementById('toast');
+      const randomName = names[Math.floor(Math.random() * names.length)];
+      toast.innerText = `🔥 ${randomName} hat gerade vorbestellt.`;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }, 12000); 
+
+    // 9. Progress Bar
+    function updateProgress() {
+      let fields = [document.getElementById('name').value, document.getElementById('klasse').value];
+      let filled = fields.filter(f => f.length > 0).length;
+      document.getElementById('progress-bar').style.width = (filled / 2) * 100 + "%";
+    }
+
+    // 10. Easter Egg
+    let clicks = 0;
+    document.getElementById('title-trigger').addEventListener('click', () => {
+      clicks++;
+      if(clicks === 5) {
+        playBeep();
+        alert("GJ OÖ PROTOKOLL ENTSPERRT. Anti-Kapitalismus-Bundle freigeschaltet.");
+        loadFaction('easteregg');
+      }
+    });
+
+    const contentData = {
+      'c': {
+        title: 'Willkommen im inneren Zirkel.',
+        text: 'Wahre Genossen sichern sich ihr Exemplar vorab. 50 Cent Rabatt sind dein In-Group-Privileg. Lass die anderen Zweige nicht gewinnen. Und denk dran: Nur eine Zeitung pro Klasse kaufen ist Verrat.',
+        options: [
+          '<option value="1x C-Genosse (Pre-Order)">1x C-Zweig Exemplar (Pre-Order Rabatt)</option>',
+          '<option value="14+1 Sammelbestellung">Das Syndikat (14 kaufen + 1 Gratis für dich)</option>'
+        ],
+        color: 'var(--green)'
+      },
+      'abm': {
+        title: 'Kulturelle Entwicklungshilfe.',
+        text: 'Eure Chance auf etwas Vibe. Sichert euch das Wissen des C-Zweigs. Wenn ihr klug seid, tut ihr euch als Klasse zusammen: Bestellt 14 Stück und wir schenken dem Klassensprecher ein Exemplar gratis. Zeigt Solidarität.',
+        options: [
+          '<option value="14+1 Sammelbestellung (Fremdzweig)">Klassen-Deal: 14 kaufen + 1 Gratis</option>',
+          '<option value="1x Entwicklungshilfe (Pre-Order)">1x Einzel-Exemplar (Pre-Order Rabatt)</option>'
+        ],
+        color: 'var(--yellow)'
+      },
+      'lehrer': {
+        title: 'Die Kontroll-Lektüre.',
+        text: 'Finden Sie heraus, was wir wirklich über Sie geschrieben haben. Unterstützen Sie den kreativsten Zweig des Hauses mit einer Vorbestellung.',
+        options: [
+          '<option value="1x Lehrer-Exemplar (Pre-Order)">1x Kontroll-Exemplar (Pre-Order Rabatt)</option>',
+          '<option value="Unterstützer-Paket (3x)">3x Gönner-Paket (Für das Konferenzzimmer)</option>'
+        ],
+        color: 'var(--purple)'
+      },
+      'easteregg': {
+        title: 'SYSTEM OVERRIDE.',
+        text: 'Zivildienst-Edition entsperrt. Kultur für alle.',
+        options: [
+          '<option value="GJ Premium Bundle">GJ OÖ Premium Bundle (Gratis für dich)</option>'
+        ],
+        color: 'var(--red)'
+      }
+    };
+
+    function loadFaction(faction) {
+      playBeep();
+      document.getElementById('gate-section').style.display = 'none';
+      document.getElementById('dynamic-content').style.display = 'block';
+      
+      const data = contentData[faction];
+      document.getElementById('dyn-title').innerText = data.title;
+      document.getElementById('dyn-text').innerText = data.text;
+      
+      const pitchBox = document.querySelector('.pitch-box');
+      pitchBox.style.backgroundColor = data.color;
+      pitchBox.style.color = 'var(--bg)';
+      
+      document.getElementById('bundle').innerHTML = data.options.join('');
+      document.getElementById('hidden-faction').value = faction.toUpperCase();
+      
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  </script>
+</body>
+</html>
